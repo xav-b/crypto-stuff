@@ -18,11 +18,11 @@ class Transaction {
     // - Reward: Satoshi rewarded with 100 coins for mining new block
     // - Regular: Satoshi paid Dean 5 coins with change of 94 coins
     // - Fee: Mining fee of 1 for whoever mines the transaction (Satoshi in example above)
-    this.type = type;
+    this.type = type
     // Where value is coming from
-    this.inputs = inputs;
+    this.inputs = inputs
     // Where value is going to
-    this.outputs = outputs;
+    this.outputs = outputs
   }
 
   // should it be part of blockchain ?
