@@ -5,7 +5,7 @@
  *
  */
 
-const crypto = require("crypto");
+const crypto = require('crypto')
 
 const blockchain = require('./blockchain')
 
@@ -29,11 +29,11 @@ class Transaction {
   hash() {
     // Uniquely identifies the transaction (using inputs & outputs)
     // TODO to be computed: f(this.inputs + this.outputs) = 000abcdefg…
-    const algo = crypto.createHash("sha256");
+    const algo = crypto.createHash('sha256')
     return algo
       .update(JSON.stringify(this.inputs))
       .update(JSON.stringify(this.outputs))
-      .digest("hex");
+      .digest('hex')
   }
 }
 
@@ -41,9 +41,9 @@ class Transaction {
 class Output {
   constructor(address, amount) {
     // What is the public wallet address to send the coins to?
-    this.address = address;
+    this.address = address
     // How many coins
-    this.amount = amount;
+    this.amount = amount
   }
 }
 
@@ -52,63 +52,61 @@ class Output {
 class Input {
   constructor(outputBlock, signature) {
     // Transaction hash of the (unspent) output
-    this.transactionHash = outputBlock.hash;
+    this.transactionHash = outputBlock.hash
     // The index of the (unspent) output in the transaction
-    this.outputIndex = outputBlock.index;
+    this.outputIndex = outputBlock.index
     // Amount of the (unspent) output
-    this.amount = outputBlock.amount;
+    this.amount = outputBlock.amount
     // Address of the (unspent) output
-    this.address = outputBlock.address;
+    this.address = outputBlock.address
     // Signed by the Address’s private key
     // TODO where does it come from
-    this.signature = signature;
+    this.signature = signature
   }
 }
 
 function rewardTransaction(address, amount) {
   // outpurs created from mining a block
-  const outputs = [new Output(address, amount)];
+  const outputs = [new Output(address, amount)]
   // Reward transactions are created as a result of finding a valid block on
   // the blockchain. As a result, reward transactions do not have any inputs
   // because it creates new coins
-  return new Transaction("reward", [], outputs);
+  return new Transaction('reward', [], outputs)
 }
 
 function getBalance(address) {
-  const inputs = getUnspentInputs();
-  const inputsForAddress = inputs.filter(input => input.address === address);
-  return inputsForAddress.reduce((total, input) => total + input.amount, 0);
+  const inputs = getUnspentInputs()
+  const inputsForAddress = inputs.filter(input => input.address === address)
+  return inputsForAddress.reduce((total, input) => total + input.amount, 0)
 }
 
 function createTransaction(myAddress) {
-  const paidTotal = payments.reduce((total, paid) => total + paid.amount, 0);
-  const fee = payments.reduce((total, payment) => total + payment.fee, 0);
-  const unspentInputs = getUnspentInputs();
+  const paidTotal = payments.reduce((total, paid) => total + paid.amount, 0)
+  const fee = payments.reduce((total, payment) => total + payment.fee, 0)
+  const unspentInputs = getUnspentInputs()
 
-  let inputTotal = 0;
+  let inputTotal = 0
   const inputs = unspentInputs.takeUntil(output => {
-    inputTotal = inputTotal + output.amount;
-    return inputTotal >= paidTotal + fee;
-  });
+    inputTotal = inputTotal + output.amount
+    return inputTotal >= paidTotal + fee
+  })
 
   let outputs = payments.map(payment => ({
     amount: payment.amount,
-    address: payment.address
-  }));
-  let change = inputTotal - paidTotal - fee;
+    address: payment.address,
+  }))
+  let change = inputTotal - paidTotal - fee
   if (change > 0) {
-    const changeOutput = { amount: change, address: myAddress };
-    outputs = outputs.push(changeOutput);
+    const changeOutput = { amount: change, address: myAddress }
+    outputs = outputs.push(changeOutput)
   }
 
-  const signedInputs = signInputs(inputs, password);
-  return new Transaction("regular", inputs, outputs);
+  const signedInputs = signInputs(inputs, password)
+  return new Transaction('regular', inputs, outputs)
 }
 
 function isTransactionDoubleSpent(allTransactions, transaction) {
-  const allTransactions = getTransactions();
+  const allTransactions = getTransactions()
 
-  return allTransactions.some(tx =>
-    tx.inputs.some(input => transaction.hasSameInput(input))
-  );
+  return allTransactions.some(tx => tx.inputs.some(input => transaction.hasSameInput(input)))
 }
