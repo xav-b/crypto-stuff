@@ -1,0 +1,19 @@
+{
+  "name": "learn",
+  "version": "1.0.0",
+  "description": "- [How Bitcoin works](https://coindemo.io/o)",
+  "main": "bitcoin.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "hackliff <xavier.bruhiere@gmail.com>",
+  "license": "ISC",
+  "dependencies": {
+    "crypto-js": "^3.1.9-1",
+    "debug": "^3.1.0",
+    "peer-exchange": "^2.2.0",
+    "uuid": "^3.1.0",
+    "wrtc": "0.0.63"
+  }
+}
