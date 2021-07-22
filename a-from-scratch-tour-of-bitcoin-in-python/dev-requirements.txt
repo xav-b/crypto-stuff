@@ -1,0 +1,4 @@
+-r requirements.txt
+
+ipython==7.25.0
+pytest==6.2.4
