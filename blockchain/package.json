@@ -10,10 +10,10 @@
   "author": "hackliff <xavier.bruhiere@gmail.com>",
   "license": "ISC",
   "dependencies": {
-    "crypto-js": "^3.1.9-1",
-    "debug": "^3.1.0",
+    "crypto-js": "^4.1.1",
+    "debug": "^4.3.2",
     "peer-exchange": "^2.2.0",
-    "uuid": "^3.1.0",
-    "wrtc": "0.0.63"
+    "uuid": "^8.3.2",
+    "wrtc": "0.4.7"
   }
 }

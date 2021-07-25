@@ -1,8 +1,12 @@
 package com.xb;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Stream;
 
 import okhttp3.*;
 import com.google.gson.*;
@@ -29,6 +33,10 @@ class CMCCoin {
     String first_historical_data;
     String last_historical_data;
     CoinPlatform platform;
+
+    public String toCSVString() {
+        return String.join(",", String.valueOf(id), String.valueOf(rank), name, symbol, slug);
+    }
 
     public String toString() {
         return "Coin mapping #" + rank + ": " + name + " " + symbol + " " + slug;
@@ -79,6 +87,23 @@ class CoinMarketCap {
             .build();
     }
 
+    public boolean dump(String csvFilename, List<CMCCoin> dataLines) throws FileNotFoundException {
+        log.info("writing data to csv: {}", csvFilename);
+        try (PrintWriter writer = new PrintWriter(new File(csvFilename))) {
+            // write CSV header
+            writer.println("id,rank,name,symbol,slug");
+            // write rows
+            dataLines.stream()
+                     .map(coin -> coin.toCSVString())
+                     .forEach(writer::println);
+        } catch (FileNotFoundException e) {
+            log.error(e.getMessage());
+            return false;
+        }
+
+        return true;
+    }
+
     public List<CMCCoin> getCoins() throws IOException {
         final Gson gson = new Gson();
         final String endpoint = "/v1/cryptocurrency/map";
@@ -117,5 +142,9 @@ public class Main {
         for(CMCCoin coin : coins) {
             log.info(coin.toString());
         }
+
+        log.info("storing coins mapping");
+        boolean success = client.dump("./coins.csv", coins);
+        log.info("coins dump " + (success ? "successful" : "failed"));
     }
 }

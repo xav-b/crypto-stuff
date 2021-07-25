@@ -7,7 +7,7 @@
     <groupId>com.xb</groupId>
     <artifactId>crypto</artifactId>
     <name>sourcing</name>
-    <version>1</version>
+    <version>0.5.1-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <properties>

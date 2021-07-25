@@ -40,3 +40,11 @@ mvn clean compile
 # run
 mvn exec:java -Dexec.mainClass="com.xb.Main"
 ```
+
+---
+
+## Todo
+
+- [ ] Properly structure the project files
+- [ ] Have 2 modules: one CMC to CSV / Another CSV to Database
+- [ ] make it a CLI
