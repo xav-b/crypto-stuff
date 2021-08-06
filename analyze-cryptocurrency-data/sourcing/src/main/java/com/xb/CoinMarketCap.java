@@ -4,9 +4,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Stream;
 
 import okhttp3.*;
 import com.google.gson.*;
@@ -39,7 +37,7 @@ class CMCCoin {
     }
 
     public String toString() {
-        return "Coin mapping #" + rank + ": " + name + " " + symbol + " " + slug;
+        return "Coin mapping #" + rank + " name: " + name + " symbol: " + symbol + " slug: " + slug;
     }
 }
 
@@ -87,11 +85,11 @@ class CoinMarketCap {
             .build();
     }
 
-    public boolean dump(String csvFilename, List<CMCCoin> dataLines) throws FileNotFoundException {
+    public boolean writeCSV(String csvFilename, String header, List<CMCCoin> dataLines) throws FileNotFoundException {
         log.info("writing data to csv: {}", csvFilename);
         try (PrintWriter writer = new PrintWriter(new File(csvFilename))) {
             // write CSV header
-            writer.println("id,rank,name,symbol,slug");
+            writer.println(header);
             // write rows
             dataLines.stream()
                      .map(coin -> coin.toCSVString())
@@ -126,25 +124,5 @@ class CoinMarketCap {
         // TODO check payload.getStatus();
 
         return payload.getData();
-    }
-}
-
-public class Main {
-    private static final Logger log = LoggerFactory.getLogger(Main.class);
-
-    public static void main(String args[]) throws IOException {
-        log.info("crypto data sourcing starting...");
-        CoinMarketCap client = new CoinMarketCap();
-
-        List<CMCCoin> coins = client.getCoins();
-
-        log.info("successfully fetched {} coin mappings", coins.size());
-        for(CMCCoin coin : coins) {
-            log.info(coin.toString());
-        }
-
-        log.info("storing coins mapping");
-        boolean success = client.dump("./coins.csv", coins);
-        log.info("coins dump " + (success ? "successful" : "failed"));
     }
 }

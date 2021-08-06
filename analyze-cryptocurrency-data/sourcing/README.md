@@ -31,14 +31,13 @@ mvn clean package
 java -cp target/crypto-1.jar com.xb.Main
 ```
 
-FIXME: doesn't include dependencies in the jar. This does but I don't
-think this is the way to package an app.
+FIXME: doesn't include dependencies in the jar, use the shade plugin to package them along the local code
 
 ```sh
 # build
 mvn clean compile
 # run
-mvn exec:java -Dexec.mainClass="com.xb.Main"
+mvn exec:java -Dexec.mainClass="com.xb.App"
 ```
 
 ---
@@ -48,3 +47,4 @@ mvn exec:java -Dexec.mainClass="com.xb.Main"
 - [ ] Properly structure the project files
 - [ ] Have 2 modules: one CMC to CSV / Another CSV to Database
 - [ ] make it a CLI
+- [ ] Add tests
