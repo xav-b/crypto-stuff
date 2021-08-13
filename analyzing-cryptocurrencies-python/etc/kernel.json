@@ -1,0 +1,9 @@
+{
+  "argv": [
+    "/Users/xav/.dna/lib/pyenv/versions/crypto/bin/python",
+    "-m", "ipykernel",
+    "-f", "{connection_file}"
+  ],
+  "display_name": "crypto",
+  "language": "python"
+}
