@@ -135,3 +135,4 @@ jspm_packages
 
 *.pkl
 _db/
+*.db
