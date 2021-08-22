@@ -1,0 +1,15 @@
+{
+  "name": "everything-you-ever-wanted-to-know-about-events-and-logs-on-ethereum",
+  "version": "0.1.0",
+  "description": "> A guide to getting the right information from events by scraping the blockchain",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "Xavier Bruhiere <xavier.bruhiere@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "web3": "^1.5.2"
+  }
+}

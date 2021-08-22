@@ -134,3 +134,4 @@ jspm_packages
 .env.dev
 
 *.pkl
+_db/
