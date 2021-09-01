@@ -2,7 +2,6 @@ package main
 
 import (
 	"bytes"
-	"crypto/sha256"
 	"encoding/gob"
 	"log"
 	"time"
@@ -72,22 +71,23 @@ func DeserializeBlock(d []byte) *Block {
 	return &block
 }
 
-// TODO: implement:
-// Bitcoin uses a more elaborate technique: it represents all transactions
-// containing in a block as a Merkle tree and uses the root hash of the tree in
-// the Proof-of-Work system. This approach allows to quickly check if a block
-// contains certain transaction, having only just the root hash and without
-// downloading all the transactions.
+// // HashTransactions returns a hash of the transactions in the block
+// Bitcoin represents all transactions containing in a block as a Merkle tree
+// and uses the root hash of the tree in the Proof-of-Work system. This approach
+// allows to quickly check if a block contains certain transaction, having only
+// just the root hash and without downloading all the transactions.
 func (b *Block) HashTransactions() []byte {
-	// hashes of each transactions
-	var txHashes [][]byte
-	// final 32 bits hash of the hashes
-	var txHash [32]byte
+	var transactions [][]byte
 
+	// aggregate the serialization of all transactions
 	for _, tx := range b.Transactions {
-		txHashes = append(txHashes, tx.Hash())
+		transactions = append(transactions, tx.Serialize())
 	}
-	txHash = sha256.Sum256(bytes.Join(txHashes, []byte{}))
+	// create a Merkle Tree. All the transactions are the bottom level of the
+	// tree, and they are hashed by pairs up to one root node, and therefore one
+	// hash that guarantees their consistency
+	mTree := NewMerkleTree(transactions)
 
-	return txHash[:]
+	// that is this root hash that we return
+	return mTree.RootNode.Data
 }

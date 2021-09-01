@@ -22,10 +22,19 @@ bolt help
 ## Usage
 
 ```go
-$ go build
-$ ./blockchain -help
-$ ./blockchain createblockchain --address Xavier
-$ ./blockchain ls
-$ ./blockchain balance -address Xavier
-$ ./blockchain send -from Xavier -to Pedro -amount 6
+$ make
+$ ./bc -help
+$ ./bc createblockchain --address Xavier
+$ ./bc ls
+$ ./bc balance -address Xavier
+$ ./bc send -from Xavier -to Pedro -amount 6
 ```
+
+---
+
+## TODO
+
+- [ ] Look at all the issues in `PROBLEMS` tab
+- [ ] Update readme usage
+- [ ] Add more tests to confirm understanding
+- [ ] Put db files together away
