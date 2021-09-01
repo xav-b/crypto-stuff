@@ -7,6 +7,7 @@ Credits to the author: [Ivan Kuznetsov](https://jeiwan.net/)
 [Part 3: Persistence and CLI](https://jeiwan.net/posts/building-blockchain-in-go-part-3/)
 [Part 4: Transactions 1](https://jeiwan.net/posts/building-blockchain-in-go-part-4/)
 [Part 5: Addresses](https://jeiwan.net/posts/building-blockchain-in-go-part-5/)
+[Part 6: Transactions 2](https://jeiwan.net/posts/building-blockchain-in-go-part-6/)
 
 ## Installation
 

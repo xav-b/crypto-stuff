@@ -16,6 +16,7 @@ func (cli *CLI) printUsage() {
 	fmt.Println("Usage:")
 	fmt.Println("\tcreateblockchain -address ADDRESS - Create a blockchain and send genesis block reward to ADDRESS")
 	fmt.Println("\tls - print all the blocks of the blockchain")
+	fmt.Println("\treindexutxo - Rebuilds the UTXO set")
 	fmt.Println("\tcreatewallet - Generates a new key-pair and saves it into the wallet file")
 	fmt.Println("\twallets - Lists all addresses from the wallet file")
 	fmt.Println("\tbalance -address ADDRESS - Get balance of ADDRESS")
@@ -36,9 +37,23 @@ func (cli *CLI) createBlockchain(address string) {
 
 	// TODO: overwrite behavior or manually delete the database
 	bc := NewBlockchain(address)
-	bc.db.Close()
+	defer bc.db.Close()
+
+	fmt.Println("initializing UTXO set")
+	UTXOSet := UTXOSet{bc}
+	fmt.Println("reindexing UTXO set")
+	UTXOSet.Reindex()
 
 	fmt.Println("Done!")
+}
+
+func (cli *CLI) reindexUTXO() {
+	bc := NewBlockchain("")
+	UTXOSet := UTXOSet{bc}
+	UTXOSet.Reindex()
+
+	count := UTXOSet.CountTransactions()
+	fmt.Printf("Done! There are %d transactions in the UTXO set.\n", count)
 }
 
 func (cli *CLI) getBalance(address string) {
@@ -46,13 +61,14 @@ func (cli *CLI) getBalance(address string) {
 		log.Panic("ERROR: Address is not valid")
 	}
 
-	bc := NewBlockchain(address)
+	bc := NewBlockchain("")
+	UTXOSet := UTXOSet{bc}
 	defer bc.db.Close()
 
 	balance := 0
 	pubKeyHash := Base58Decode([]byte(address))
 	pubKeyHash = pubKeyHash[1 : len(pubKeyHash)-4]
-	UTXOs := bc.FindUTXO(pubKeyHash)
+	UTXOs := UTXOSet.FindUTXO(pubKeyHash)
 
 	for _, out := range UTXOs {
 		balance += out.Value
@@ -93,9 +109,8 @@ func (cli *CLI) printChain() {
 		block := bci.Next()
 		pow := NewProofOfWork(block)
 
-		fmt.Printf("============ Block %x ============\n", block.Hash)
+		fmt.Printf("\n============ Block %x ============\n", block.Hash)
 		fmt.Printf("Prev. block: %x\n", block.PrevBlockHash)
-		pow := NewProofOfWork(block)
 		fmt.Printf("PoW: %s\n\n", strconv.FormatBool(pow.Validate()))
 		for _, tx := range block.Transactions {
 			fmt.Println(tx)
@@ -116,11 +131,22 @@ func (cli *CLI) send(from, to string, amount int) {
 		log.Panic("ERROR: Recipient address is not valid")
 	}
 
-	bc := NewBlockchain(from)
+	fmt.Println("initializing a new transaction")
+	bc := NewBlockchain("")
+	UTXOSet := UTXOSet{bc}
 	defer bc.db.Close()
 
-	tx := NewUTXOTransaction(from, to, amount, bc)
-	bc.AddBlock([]*Transaction{tx})
+	fmt.Printf("creating the coinbase tx, reward to %s\n", from)
+	cbTx := NewCoinbaseTX(from, "")
+	fmt.Printf("creating the actual transaction of %d bitcoins\n", amount)
+	tx := NewUTXOTransaction(from, to, amount, &UTXOSet)
+	txs := []*Transaction{cbTx, tx}
+
+	fmt.Println("mining the new block")
+	newBlock := bc.AddBlock(txs)
+	fmt.Println("updating UTXO set")
+	UTXOSet.Update(newBlock)
+
 	fmt.Println("Success!")
 }
 
@@ -134,6 +160,7 @@ func (cli *CLI) Run() {
 	walletsCmd := flag.NewFlagSet("wallets", flag.ExitOnError)
 	getBalanceCmd := flag.NewFlagSet("balance", flag.ExitOnError)
 	sendCmd := flag.NewFlagSet("send", flag.ExitOnError)
+	reindexUTXOCmd := flag.NewFlagSet("reindexutxo", flag.ExitOnError)
 
 	// CLI flags
 	createBlockchainAddress := createBlockchainCmd.String("address", "", "The address to send genesis block reward to")
@@ -157,11 +184,13 @@ func (cli *CLI) Run() {
 	case "createwallet":
 		_ = createWalletCmd.Parse(os.Args[2:])
 	case "wallets":
-		_ = listAddressesCmd.Parse(os.Args[2:])
+		_ = walletsCmd.Parse(os.Args[2:])
 	case "balance":
 		_ = getBalanceCmd.Parse(os.Args[2:])
 	case "send":
 		_ = sendCmd.Parse(os.Args[2:])
+	case "reindexutxo":
+		_ = reindexUTXOCmd.Parse(os.Args[2:])
 	default:
 		cli.printUsage()
 		os.Exit(1)
@@ -195,6 +224,10 @@ func (cli *CLI) Run() {
 			os.Exit(1)
 		}
 		cli.getBalance(*getBalanceAddress)
+	}
+
+	if reindexUTXOCmd.Parsed() {
+		cli.reindexUTXO()
 	}
 
 	if sendCmd.Parsed() {
