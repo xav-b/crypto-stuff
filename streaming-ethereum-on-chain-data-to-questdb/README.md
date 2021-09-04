@@ -1,35 +1,52 @@
 # [Streaming Ethereum On-Chain Data to QuestDB](https://medium.com/geekculture/streaming-ethereum-on-chain-data-to-questdb-ea6b51d990ab)
 
-Credits to Yitaek Hwang, awesome content.
+Credits to Yitaek Hwang, awesome content. Also available on [QuestDB blog](https://questdb.io/tutorial/2021/04/12/ethereum/).
+
+Other inspiration resources:
+- [Go Ethereum book](https://goethereumbook.org)
+- [Eth JSON-RPC API](https://eth.wiki/json-rpc/API)
+
+**On-chain data streamed**:
+
+- [ ] blocks
+- [ ] tokens
+- [ ] token transfers
+- [ ] transactions
+- [ ] logs
+- [ ] traces
+- [ ] contracts
 
 
 ## Schemas
 
+TODO: make them sql files and automate the process.
+
 Stolen from [etl blockchain](https://github.com/blockchain-etl/ethereum-etl-postgres/tree/master/schema), with types converted to java for QuestDB.
 
 ```sql
-create table blocks
+create table block
 (
+    created_at timestamp,
     timestamp timestamp,
 
-    number bigint,
+    number long,
     hash string,
     parent_hash string,
-    nonce string,
+    nonce long256,
     sha3_uncles string,
     logs_bloom string,
     transactions_root string,
     state_root string,
     receipts_root string,
     miner string,
-    difficulty string,
-    total_difficulty string,
-    size bigint,
+    difficulty long,
+    total_difficulty long,
+    size float,
     extra_data string,
-    gas_limit bigint,
-    gas_used bigint,
-    transaction_count bigint,
-    base_fee_per_gas bigint
+    gas_limit int,
+    gas_used int,
+    transaction_count int,
+    base_fee_per_gas long
 );
 ```
 

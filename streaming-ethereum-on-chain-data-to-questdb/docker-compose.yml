@@ -1,0 +1,39 @@
+# common production services
+
+version: "3"
+
+services:
+  database:
+    container_name: timescaledb
+    image: timescale/timescaledb:latest-pg11
+    env_file:
+      - init.d/env.timescaledb
+    volumes:
+      - timescaledb:/var/lib/postgresql/data
+      - ./init.d:/docker-entrypoint-initdb.d/
+    ports:
+      - "5432:5432"
+    networks:
+      - crypto
+    restart: unless-stopped
+
+  grafana:
+    container_name: grafana
+    image: grafana/grafana:7.5.7
+    env_file:
+      - init.d/env.grafana
+    volumes:
+      - grafana:/var/lib/grafana
+    ports:
+      - "3000:3000"
+    networks:
+      - crypto
+    restart: unless-stopped
+
+networks:
+  crypto:
+    driver: bridge
+
+volumes:
+  timescaledb:
+  grafana:

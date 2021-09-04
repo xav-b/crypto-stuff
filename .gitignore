@@ -137,3 +137,4 @@ jspm_packages
 _db/
 *.db
 *.dat
+stream
