@@ -1,25 +1,66 @@
-# [Streaming Ethereum On-Chain Data to QuestDB](https://medium.com/geekculture/streaming-ethereum-on-chain-data-to-questdb-ea6b51d990ab)
+# Streaming on-chain Ethereum data
 
-Credits to Yitaek Hwang, awesome content. Also available on [QuestDB blog](https://questdb.io/tutorial/2021/04/12/ethereum/).
+## Getting started
 
-Other inspiration resources:
+**Pre-requesites**:
+
+- Go installed (tested under version `go1.16.6 darwin/amd64`)
+- Docker installed (tested under version `20.10.8`)
+- You have an [Infura](https://infura.io/) account. Create a project and note the project ID.
+
+Start a Postgres database and a Grafana dashboard (port 3000): `docker compose up -d`
+
+```console
+# Infura project ID for auth
+export INFURA_PROJECT_ID="..."
+
+# build the go binary `./stream`
+make
+
+# start listening for new blocks
+./stream \
+    -network mainnet \
+    -db postgresql://postgres:RDLPWbx5hM3ra@localhost:5432/crypto
+
+./stream \
+    -network mainnet \
+    -db postgresql://postgres:RDLPWbx5hM3ra@localhost:5432/crypto \
+    -block 0xa5a821871e51e45437dc192321b080a9c0ced86aadefb9e3e0e071398fcc87a3
+```
+
+**Resources and credits**:
 - [Go Ethereum book](https://goethereumbook.org)
 - [Eth JSON-RPC API](https://eth.wiki/json-rpc/API)
+- [Go-ethereum documentation](https://pkg.go.dev/github.com/ethereum/go-ethereum@v1.10.8)
 
 **On-chain data streamed**:
 
-- [ ] blocks
+- [x] blocks
 - [ ] tokens
 - [ ] token transfers
-- [ ] transactions
+- [x] transactions
 - [ ] logs
 - [ ] traces
 - [ ] contracts
 
+**Fixmes**:
 
-## Schemas
+- [ ] Ctrl-c is no longer caught since I added transactions storage
+- [ ] Some values get bigger than Postgres `BIGINT`
+- [ ] Data bytes fail to be encoded as UTF-8 for Postgres storage
 
-TODO: make them sql files and automate the process.
+---
+
+Originally inspired from [Streaming Ethereum On-Chain Data to QuestDB](https://medium.com/geekculture/streaming-ethereum-on-chain-data-to-questdb-ea6b51d990ab).
+
+Credits to Yitaek Hwang, awesome content. Also available on [QuestDB blog](https://questdb.io/tutorial/2021/04/12/ethereum/).
+
+## QuestDB Schemas
+
+In theory QuestDB can be used as a Postgres-compatible replacement so passing
+`-db postgresql://admin:quest@localhost:8812/qdb` should work to initialise the
+connection. Then use the schemas below, although I'm no longer sure they map to
+the golang types (feel free to open an issue).
 
 Stolen from [etl blockchain](https://github.com/blockchain-etl/ethereum-etl-postgres/tree/master/schema), with types converted to java for QuestDB.
 
