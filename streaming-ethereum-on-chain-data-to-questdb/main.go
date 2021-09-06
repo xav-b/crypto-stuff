@@ -89,19 +89,43 @@ func onBlock(block *types.Block, conn *pgx.Conn) error {
 	// convert to timestamp
 	log.Printf("storing new block: %s\n", block.Hash().Hex())
 	_, err := conn.Exec(context.Background(), NEW_BLOCK_SQL,
+		// block timestamp is expressed in seconds since Unix epoch time. Time
+		// is the time when the block was mined. The timestamp is set by the
+		// miner that mined that block.
 		blockTs,
+
 		block.NumberU64(),
 		block.Hash().Hex(),
 		block.ParentHash().Hex(),
 		// nonce is too big for big
 		strconv.FormatUint(block.Nonce(), 10),
 		block.UncleHash().Hex(),
+
+		// The bloom filter for the block logs, and it allows to filter the hash
+		// of each element in the block. The objective is to minimize the number
+		// of queries that clients need to make by storing some events like
+		// historical transactions in the bloom. When there’s a query “Is data z
+		// in the set?” the response can be “maybe” or “no”. Thus is a
+		// probabilistic data structure.
 		// FIXME: string(block.Bloom().Bytes()),
+
+		// 32 bytes string root hash of the Merkle tree of all the transactions in the block
 		block.TxHash().Hex(),
+
+		// Root can be seen as a giant Merkle Tree of all the previous blocks,
+		// transactions and code in the Ethereum blockchain hashed into the
+		// stateRoot of this block.
 		block.Root().Hex(),
+
+		// Root hash of the transactions receipts
 		block.ReceiptHash().Hex(),
+
+		// miner address
 		block.Coinbase().String(),
+
+		// mining difficulty level
 		block.Difficulty().Int64(),
+
 		block.Size(),
 		// FIXME: string(block.Extra()),
 		block.GasLimit(),
