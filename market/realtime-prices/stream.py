@@ -1,9 +1,13 @@
 #!/usr/bin/env python
 
 from dataclasses import dataclass
+import datetime as dt
 
 import asyncio
 from binance import AsyncClient, BinanceSocketManager
+
+from .broker import init_producer
+from .config import BROKER
 
 
 @dataclass
@@ -42,7 +46,22 @@ class TickerStream:
     event_type: str = '24hrTicker'
 
 
-async def kline_listener(client, symbol):
+SCHEMA = {
+    'type': 'struct',
+    'optional': False,
+    'name': 'binance_symbol_ticker',
+    'fields': [
+        {'field': 'created_at', 'type': 'string', 'optional': False},
+        {'field': 'timestamp', 'type': 'string', 'optional': False},
+        {'field': 'symbol', 'type': 'string', 'optional': False},
+        {'field': 'price', 'type': 'float', 'optional': False},
+        {'field': 'price_change', 'type': 'float', 'optional': False},
+        {'field': 'price_change_pct', 'type': 'float', 'optional': False},
+    ]
+}
+
+
+async def ticker_listener(client, symbol, producer):
     bm = BinanceSocketManager(client, user_timeout=60)
 
     async with bm.symbol_ticker_socket(symbol=symbol) as stream:
@@ -73,18 +92,31 @@ async def kline_listener(client, symbol):
                 tot_trades=msg['n'],
             )
             print(ticker.event_time, ticker.symbol, ticker.price_change, ticker.price_change_pct)
+            payload = {
+                'timestamp': ticker.event_time,
+                'created_at': dt.datetime.utcnow(),
+                'symbol': ticker.symbol,
+                'price': ticker.toda_close,
+                'price_change': ticker.price_change,
+                'price_change_pct': ticker.price_change_pct,
+            }
+            msg = {
+                'schema': SCHEMA,
+                'payload': payload,
+            }
+            producer.send(topic='topic_BTC', partition=0, value=msg)
 
 
-async def main():
+async def main(symbol, producer):
+    producer = init_producer([BROKER])
     client = await AsyncClient.create()
 
     status = await client.get_system_status()
     print(status)
 
-    symbol = 'BNBBTC'
-    await kline_listener(client, symbol)
+    await ticker_listener(client, symbol, producer)
 
 if __name__ == "__main__":
-
+    # TODO: define a list of pairs and run the streaming in parallel
     loop = asyncio.get_event_loop()
-    loop.run_until_complete(main())
+    loop.run_until_complete(main('BNBBTC'))
